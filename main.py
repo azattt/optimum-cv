@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import pytesseract
 
+# Эта часть использовалась для тестирования распознования номеров участков, но она не заработала, так как
+# не находила все цифры
 USE_TESSERACT = False
 if USE_TESSERACT:
     # нужно скачивать tesseract-ocr и вставлять путь сюда
