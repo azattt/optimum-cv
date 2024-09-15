@@ -1,3 +1,4 @@
+import itertools
 import os
 from queue import Queue
 import random
@@ -183,41 +184,70 @@ def divide_big_area_to_smaller(
         removed_blobs, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE
     )
     hierarchy = hierarchy_outer[0]
-
-    image_with_contours_colored = np.zeros((*image.shape, 3), dtype=np.uint8)
-
+    next_index = 1
+    image_with_contours_colored = np.zeros((*image.shape, 4), dtype=np.uint8)
+    colors: set[tuple[int, int, int, int]] = set()
     random.seed(4)
-    children: Queue[int] = Queue()
-    next_contour_index = 0
-    level = 0
-    indices = []
-    while next_contour_index != -1 or not children.empty():
-        if next_contour_index == -1:
-            next_contour_index = children.get()
-            # print("going down at", next_index)
-            level += 1
+    max_arc_length = 0.0
+    # index_with_max_arc_length = 0
+    # Похоже, что контур с самым большим периметром - последний контур в текущем уровне иерархии
 
-        indices.append(int(next_contour_index))
-        cnt = contours[next_contour_index]
+    index_with_max_arc_length = 0
+    while hierarchy[next_index][3] != -1:
+        next_index = hierarchy[next_index][0]
+    
+    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
+    cv2.polylines(image_with_contours_colored, [contours[next_index]], False, color)
+    # while next_index != -1:
+    #     # print(next_index)
+    #     
+    #     while color in colors:
+    #         color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
+    #     colors.add(color)
+    #     print(next_index)
+    #     arcLength = cv2.arcLength(contours[next_index], False)
+    #     if arcLength > max_arc_length:
+    #         max_arc_length = arcLength
+    #         index_with_max_arc_length = next_index
+    #     cv2.polylines(image_with_contours_colored, [contours[next_index]], False, color)
+    #     next_index = hierarchy[next_index][0]
+
+    print(max_arc_length, index_with_max_arc_length)
+    cv2.imshow("image_with_contours_colored.png", image_with_contours_colored)
+    
+
+    # random.seed(4)
+    # children: Queue[int] = Queue()
+    # next_contour_index = 0
+    # level = 0
+    # indices = []
+    # while next_contour_index != -1 or not children.empty():
+    #     if next_contour_index == -1:
+    #         next_contour_index = children.get()
+    #         # print("going down at", next_index)
+    #         level += 1
+
+    #     indices.append(int(next_contour_index))
+    #     cnt = contours[next_contour_index]
         
-        if True or cv2.contourArea(cnt) >= 200 and cv2.arcLength(cnt, True) >= 200:
-            # print(level, show_level)
-            if level == show_level:
-                # print(level, next_contour_index)
-                color = (
-                    random.randint(100, 255),
-                    random.randint(100, 255),
-                    random.randint(100, 255),
-                )
-                cv2.fillPoly(image_with_contours_colored, [cnt], color)
-                cv2.polylines(image_with_contours_colored, [cnt], False, color)
+    #     if True or cv2.contourArea(cnt) >= 200 and cv2.arcLength(cnt, True) >= 200:
+    #         # print(level, show_level)
+    #         if level == show_level:
+    #             # print(level, next_contour_index)
+    #             color = (
+    #                 random.randint(100, 255),
+    #                 random.randint(100, 255),
+    #                 random.randint(100, 255),
+    #             )
+    #             cv2.fillPoly(image_with_contours_colored, [cnt], color)
+    #             cv2.polylines(image_with_contours_colored, [cnt], False, color)
 
-        if hierarchy[next_contour_index][2] != -1:
-            children.put(hierarchy[next_contour_index][2])
+    #     if hierarchy[next_contour_index][2] != -1:
+    #         children.put(hierarchy[next_contour_index][2])
 
-        next_contour_index = hierarchy[next_contour_index][0]
+    #     next_contour_index = hierarchy[next_contour_index][0]
 
-    cv2.imshow("image_with_contours_colored", image_with_contours_colored)
+    # cv2.imshow("image_with_contours_colored", image_with_contours_colored)
 
     return image
 
@@ -228,6 +258,9 @@ class Test:
     def __init__(self, show_level: int, images: tuple[np.ndarray, np.ndarray]):
         self.show_level = show_level
         self.images = images
+        # cv2.namedWindow("image_with_contours_colored")
+        # cv2.createTrackbar("show_level", "image_with_contours_colored", 0, 400, self.set_show_level)
+        self.draw()
 
     def set_show_level(self, show_level: int = 0):
         self.show_level = show_level
@@ -245,8 +278,6 @@ def main():
     image_width = image.shape[1]
     areas = find_big_areas(image)
     test = Test(0, areas[0])
-    cv2.namedWindow("image_with_contours_colored")
-    cv2.createTrackbar("show_level", "image_with_contours_colored", 0, 400, test.set_show_level)
     # for i, images in enumerate(areas):
     #     colored_contours = divide_big_area_to_smaller(images, main.show_level)
     #     cv2.imshow(f"colored_contours_{i}", colored_contours)
