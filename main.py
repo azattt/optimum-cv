@@ -2,42 +2,43 @@ import os
 import random
 import cv2
 import numpy as np
-import pytesseract
+# import pytesseract
 
 
 # Эта часть использовалась для тестирования распознования номеров участков, но она не заработала, так как
 # не находила все цифры
-USE_TESSERACT = False
-if USE_TESSERACT:
-    # нужно скачивать tesseract-ocr и вставлять путь сюда
-    pytesseract.pytesseract.tesseract_cmd = r"D:\tesseract-ocr\tesseract.exe"
+# USE_TESSERACT = False
+# if USE_TESSERACT:
+#     # нужно скачивать tesseract-ocr и вставлять путь сюда
+#     pytesseract.pytesseract.tesseract_cmd = r"D:\tesseract-ocr\tesseract.exe"
 
-    def find_digits_tesseract(im):
-        out = np.copy(im)
-        data = pytesseract.image_to_boxes(
-            out, output_type=pytesseract.Output.DICT, config="--psm 11 digits"
-        )
-        if "char" in data:
-            for i, char in enumerate(data["char"]):
-                cv2.rectangle(
-                    out,
-                    (data["left"][i], im.shape[0] - data["top"][i]),
-                    (data["right"][i], im.shape[0] - data["bottom"][i]),
-                    (0, 255, 0),
-                    2,
-                )
-                cv2.putText(
-                    out,
-                    char,
-                    (data["left"][i], im.shape[0] - data["top"][i]),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 0),
-                )
-        return out
+#     def find_digits_tesseract(im):
+#         out = np.copy(im)
+#         data = pytesseract.image_to_boxes(
+#             out, output_type=pytesseract.Output.DICT, config="--psm 11 digits"
+#         )
+#         if "char" in data:
+#             for i, char in enumerate(data["char"]):
+#                 cv2.rectangle(
+#                     out,
+#                     (data["left"][i], im.shape[0] - data["top"][i]),
+#                     (data["right"][i], im.shape[0] - data["bottom"][i]),
+#                     (0, 255, 0),
+#                     2,
+#                 )
+#                 cv2.putText(
+#                     out,
+#                     char,
+#                     (data["left"][i], im.shape[0] - data["top"][i]),
+#                     cv2.FONT_HERSHEY_SIMPLEX,
+#                     0.5,
+#                     (0, 255, 0),
+#                 )
+#         return out
 
 
 # взято из https://stackoverflow.com/a/20831563
+# не помогло
 def neighbours_vec(image):
     return (
         image[2:, 1:-1],
@@ -138,8 +139,8 @@ def find_big_areas(src: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
         cv2.imwrite("images/results/find_big_areas_v1/threshold.png", threshold)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     removed_blobs = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, kernel)
-    if SHOW_FIND_BIG_AREAS_STAGES:
-        cv2.imwrite("images/results/find_big_areas_v1/removed_blobs.png", removed_blobs)
+    # if SHOW_FIND_BIG_AREAS_STAGES:
+    #     cv2.imwrite("images/results/find_big_areas_v1/removed_blobs.png", removed_blobs)
     contours, _ = cv2.findContours(removed_blobs, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     i = 0
