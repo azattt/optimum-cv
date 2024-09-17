@@ -278,11 +278,11 @@ class Test:
 def main():
     
     # проблема с download2.png
-    image = cv2.imread("images/map_samples/download.png")
+    image = cv2.imread("images/map_samples/download2.png")
     image_height = image.shape[0]
     image_width = image.shape[1]
     areas = find_big_areas(image)
-    test = Test(0, areas[0])
+    # test = Test(0, areas[0])
     # for i, images in enumerate(areas):
     #     colored_contours = divide_big_area_to_smaller(images, main.show_level)
     #     cv2.imshow(f"colored_contours_{i}", colored_contours)
