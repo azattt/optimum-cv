@@ -174,7 +174,7 @@ def find_big_areas(src: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
 
 
 def divide_big_area_to_smaller(
-    big_area: tuple[np.ndarray, np.ndarray], show_level: int
+    big_area: tuple[np.ndarray, np.ndarray], trackbar_value: int
 ) -> np.ndarray:
     """Эта функция должна находить участки внутри кадастрового квартала"""
     image = big_area[1].copy()
@@ -184,20 +184,32 @@ def divide_big_area_to_smaller(
         removed_blobs, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE
     )
     hierarchy = hierarchy_outer[0]
-    next_index = 1
-    image_with_contours_colored = np.zeros((*image.shape, 4), dtype=np.uint8)
+    # next_index = 884
+    image_with_contours_colored = np.zeros((*image.shape, 3), dtype=np.uint8)
     colors: set[tuple[int, int, int, int]] = set()
     random.seed(4)
     max_arc_length = 0.0
     # index_with_max_arc_length = 0
     # Похоже, что контур с самым большим периметром - последний контур в текущем уровне иерархии
 
-    index_with_max_arc_length = 0
-    while hierarchy[next_index][3] != -1:
-        next_index = hierarchy[next_index][0]
-    
-    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
-    cv2.polylines(image_with_contours_colored, [contours[next_index]], False, color)
+    # 884 885 1105
+    indices: list[int] = [i for i in range(len(hierarchy)) if hierarchy[i][3] == 884]
+    # indices.append(0)
+    indices.append(884)
+    # indices = [trackbar_value]
+    # index_with_max_arc_length = 0
+    # while hierarchy[next_index][0] != -1:
+    #     next_index = int(hierarchy[next_index][0])
+    #     indices.append(next_index)
+    print([hierarchy[i] for i in indices])
+    # color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    color = (0, 255, 0)
+    # cv2.polylines(image_with_contours_colored, [contours[i] for i in indices], False, color)
+    # for contour in contours[2:30]:
+        # cv2.fillPoly(image_with_contours_colored, [contour], color)
+    cv2.fillPoly(image_with_contours_colored, [contours[i] for i in indices], color)
+    result = cv2.addWeighted(big_area[0], 1.0, image_with_contours_colored, 0.5, 0)
+    cv2.imshow("result", result)
     # while next_index != -1:
     #     # print(next_index)
     #     
@@ -212,9 +224,8 @@ def divide_big_area_to_smaller(
     #     cv2.polylines(image_with_contours_colored, [contours[next_index]], False, color)
     #     next_index = hierarchy[next_index][0]
 
-    print(max_arc_length, index_with_max_arc_length)
-    cv2.imshow("image_with_contours_colored.png", image_with_contours_colored)
-    
+    # print(max_arc_length, index_with_max_arc_length)
+    cv2.imshow("image_with_contours_colored", image_with_contours_colored)
 
     # random.seed(4)
     # children: Queue[int] = Queue()
@@ -256,18 +267,19 @@ def divide_big_area_to_smaller(
 # Тестовый код, нужно убрать
 class Test:
     def __init__(self, show_level: int, images: tuple[np.ndarray, np.ndarray]):
-        self.show_level = show_level
+        self.trackbar_value = show_level
         self.images = images
-        # cv2.namedWindow("image_with_contours_colored")
-        # cv2.createTrackbar("show_level", "image_with_contours_colored", 0, 400, self.set_show_level)
+        cv2.namedWindow("image_with_contours_colored")
+        cv2.resizeWindow("image_with_contours_colored", 1500, 0)
+        cv2.createTrackbar("value", "image_with_contours_colored", 0, 1143, self.set_trackbar_value)
         self.draw()
 
-    def set_show_level(self, show_level: int = 0):
-        self.show_level = show_level
+    def set_trackbar_value(self, trackbar_value: int = 0):
+        self.trackbar_value = trackbar_value
         self.draw()
     
     def draw(self):
-        divide_big_area_to_smaller(self.images, self.show_level)
+        divide_big_area_to_smaller(self.images, self.trackbar_value)
         # cv2.imshow(f"cropped_{0}.png", self.images[0])
 
 def main():
