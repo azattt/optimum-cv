@@ -1,16 +1,8 @@
-import itertools
 import os
-from queue import Queue
 import random
-from typing import Any
 import cv2
 import numpy as np
 import pytesseract
-
-import matplotlib.pyplot as plt
-import networkx as nx
-import pydot
-from networkx.drawing.nx_pydot import graphviz_layout
 
 
 # Эта часть использовалась для тестирования распознования номеров участков, но она не заработала, так как
