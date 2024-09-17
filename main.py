@@ -110,7 +110,7 @@ MIN_PERIMETER = 10
 MIN_AREA = 300
 SHOW_FIND_BIG_AREAS_STAGES = True
 if SHOW_FIND_BIG_AREAS_STAGES:
-    os.makedirs("results/find_big_areas_v1", exist_ok=True)
+    os.makedirs("images/results/find_big_areas_v1", exist_ok=True)
 
 
 def find_big_areas(src: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
