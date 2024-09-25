@@ -7,7 +7,6 @@ from curl_cffi import requests
 logger = logging.getLogger("rosreestr")
 
 async def search_address(text: str, tolerance: int = 32768) -> dict | None:
-    raise RuntimeError()
     async with requests.AsyncSession() as s:
         r = s.get(
             "https://pkk.rosreestr.ru/arcgis/rest/services/Address/pkk_locator_street/GeocodeServer/findAddressCandidates",
