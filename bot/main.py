@@ -15,6 +15,7 @@ async def main():
     bot = Bot(zemlebot_token)
     dp = Dispatcher()
     dp.include_router(user_router)
+     # due to curl_cffi
     await dp.start_polling(bot)
 
 asyncio.run(main())
