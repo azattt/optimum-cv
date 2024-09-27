@@ -19,6 +19,7 @@ class Paginator:
 
         self.router.message.register(self.show, UserStates.search_input)
         
+        
 
     async def show(self, message: Message):
         inline_keyboard: list[list[InlineKeyboardButton]] = []
@@ -27,6 +28,8 @@ class Paginator:
 
         reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
         await message.answer(self.title, reply_markup=reply_markup)
+    
+    # async def
 
     def set_data(self, data: list[tuple[str, str]]):
         self.data = data
