@@ -54,7 +54,7 @@ class Paginator:
 
 
 logger = logging.getLogger("user_router")
-user_router = Router()
+user_router = Router(name="user_router")
 
 
 @user_router.message(CommandStart())
