@@ -15,7 +15,7 @@ async def main():
     # init db
     db_user = "zemlebot"
     db_password = getpass.getpass("Postgresql password: ")
-    await Tortoise.init(db_url=f"postgresql://{db_user}:{db_password}localhost:5432")
+    await Tortoise.init(db_url=f"postgresql://{db_user}:{db_password}@localhost:5432")
     zemlebot_token = os.getenv("ZEMLEBOT_TOKEN")
     if zemlebot_token is None:
         raise RuntimeError("Bot token is not set")
