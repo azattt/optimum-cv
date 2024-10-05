@@ -22,7 +22,6 @@ class Paginator:
         self.router.callback_query.register(self.show, F.data.startswith(self.callback_data + ":"))
 
     async def show(self, message_or_callback_query: Message | CallbackQuery):
-        
         if isinstance(message_or_callback_query, Message):
             message = message_or_callback_query
             page = 0

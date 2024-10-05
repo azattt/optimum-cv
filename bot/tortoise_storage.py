@@ -2,6 +2,8 @@ import json
 import logging
 from typing import Any
 
+from tortoise.exceptions import DoesNotExist
+
 from aiogram.fsm.storage.base import (
     BaseStorage,
     StateType,
@@ -35,8 +37,12 @@ class TortoiseStorage(BaseStorage):
             new_state = ""
 
         self.logger.debug("Setting %s state to %s", db_key, new_state)
-
-        (await User.get(tg_id=db_key)).state = new_state
+        try:
+            user = await User.get(tg_id=db_key)
+        except DoesNotExist:
+            self.logger.warning("User with id %s does not exist", db_key)
+            return
+        user.state = new_state
 
     async def get_state(self, key: StorageKey) -> str | None:
         """
@@ -47,11 +53,16 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         self.logger.debug("Getting state for %s", db_key)
-        result = await User.get(tg_id=db_key)
-        if not result:
+        user = await User.get(tg_id=db_key)
+        try:
+            user = await User.get(tg_id=db_key)
+        except DoesNotExist:
+            self.logger.warning("User with id %s does not exist", db_key)
+            return None
+        if not user:
             return None
         
-        return result.state
+        return user.state
 
 
 
@@ -64,7 +75,12 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         self.logger.debug("Setting data for %s", db_key)
-        (await User.get(tg_id=db_key)).data = data
+        try:
+            user = await User.get(tg_id=db_key)
+        except DoesNotExist:
+            self.logger.warning("User with id %s does not exist", db_key)
+            return
+        user.data = data
 
 
     async def get_data(self, key: StorageKey) -> dict[str, Any]:
@@ -76,11 +92,15 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         self.logger.debug("Getting data for %s", db_key)
-        result = await User.get(tg_id=db_key)
-        if not result:
-            raise RuntimeError("no data")
+        try:
+            user = await User.get(tg_id=db_key)
+        except DoesNotExist:
+            self.logger.warning("User with id %s does not exist", db_key)
+            return {}
+        # if not user:
+        #     raise RuntimeError("no data")
         
-        data = result.data
+        data = user.data
         if not data:
             return {}
         if isinstance(data, list):
