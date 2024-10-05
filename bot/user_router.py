@@ -1,5 +1,5 @@
 import logging
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart
@@ -7,6 +7,7 @@ from aiogram.filters import CommandStart
 from states import UserStates
 
 from rosreestr import search_address
+
 
 
 class Paginator:
@@ -21,7 +22,7 @@ class Paginator:
         self.router.callback_query.register(self.show, F.data.startswith(self.callback_data + ":"))
 
     async def show(self, message_or_callback_query: Message | CallbackQuery):
-        print(1)
+        
         if isinstance(message_or_callback_query, Message):
             message = message_or_callback_query
             page = 0
@@ -46,8 +47,6 @@ class Paginator:
                 await message.answer(self.title, reply_markup=reply_markup)
             else:
                 await message.edit_text(self.title, reply_markup=reply_markup)
-
-        
 
     def set_data(self, data: list[tuple[str, str]]):
         self.data = data
