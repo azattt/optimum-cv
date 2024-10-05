@@ -15,8 +15,10 @@ from models import User
 
 print("loading", __file__)
 
+
 class TortoiseStorage(BaseStorage):
     """Single bot, single chat storage for Tortoise"""
+
     def __init__(self):
         self.logger = logging.getLogger("TortoiseStorage")
 
@@ -29,7 +31,7 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         if isinstance(state, State):
-            new_state = state.state 
+            new_state = state.state
         else:
             new_state = state
 
@@ -58,12 +60,8 @@ class TortoiseStorage(BaseStorage):
             user = await User.get(tg_id=db_key)
         except DoesNotExist:
             return None
-        if not user:
-            return None
-        
+
         return user.state
-
-
 
     async def set_data(self, key: StorageKey, data: dict[str, Any]) -> None:
         """
@@ -82,7 +80,6 @@ class TortoiseStorage(BaseStorage):
         user.data = data
         await user.save()
 
-
     async def get_data(self, key: StorageKey) -> dict[str, Any]:
         """
         Get current data for key
@@ -95,7 +92,7 @@ class TortoiseStorage(BaseStorage):
         user = await User.get(tg_id=db_key)
         # if not user:
         #     raise RuntimeError("no data")
-        
+
         data = user.data
         if not data:
             return {}
@@ -108,6 +105,3 @@ class TortoiseStorage(BaseStorage):
         Close storage (database connection, file or etc.)
         """
         self.logger.debug("Closing storage (no need to close, ORM will do that for us)")
-    
-        
-    

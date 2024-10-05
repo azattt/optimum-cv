@@ -13,11 +13,13 @@ from tortoise_storage import TortoiseStorage
 
 
 async def main():
-    logging.basicConfig()
+    logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("aiogram").setLevel(logging.DEBUG)
+    logging.getLogger("tortoise").setLevel(logging.WARNING)
+    logging.getLogger("tortoise.db_client").setLevel(logging.WARNING)
     # init db
     db_user = "zemlebot"
-    db_password = getpass.getpass("Postgresql password: ")
+    db_password = os.getenv("ZEMLEBOT_POSTGRES_PASSWORD") or getpass.getpass("Postgresql password: ")
     await Tortoise.init(
         db_url=f"asyncpg://{db_user}:{db_password}@localhost:5432/zemlebot",
         modules={"models": ["models"]},
