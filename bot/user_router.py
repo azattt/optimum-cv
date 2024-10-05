@@ -11,17 +11,23 @@ from rosreestr import search_address
 
 
 class Paginator:
-    def __init__(self, router: Router, callback_data: str, title: str):
+    FAIL_CALLBACK_DATA = "start" 
+    def __init__(self, router: Router, callback_data: str, title: str, limit: int = 5):
         self.router = router
         self.callback_data = callback_data
         self.title = title
-        self.data: list[tuple[str, str]] = []
-        self.limit = 3
+        self.limit = limit
 
         self.router.message.register(self.show, UserStates.search_result)
         self.router.callback_query.register(self.show, F.data.startswith(self.callback_data + ":"))
 
-    async def show(self, message_or_callback_query: Message | CallbackQuery):
+    async def show(self, message_or_callback_query: Message | CallbackQuery, state: FSMContext):
+        state_data = (await state.get_data())
+        if "Paginator" not in state_data:
+            raise RuntimeError()
+        if self.callback_data not in state_data["Paginator"]:
+            raise RuntimeError()
+ 
         if isinstance(message_or_callback_query, Message):
             message = message_or_callback_query
             page = 0
@@ -30,13 +36,21 @@ class Paginator:
             if message_or_callback_query.data is None:
                 raise RuntimeError("empty callback")
             message = message_or_callback_query.message
+            if message.message_id != state_data["Paginator"][self.callback_data]["message_id"]:
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Вернуться в начало", callback_data=Paginator.FAIL_CALLBACK_DATA)]])
+                await message.edit_text("Сообщение устарело.", reply_markup=keyboard)
+                return
             page = int(message_or_callback_query.data.split(":")[-1])
         else:
             raise RuntimeError("message or callback_query.message is not valid")
         
-        if len(self.data) - page * self.limit > 0 and page >= 0:
+
+        
+        data = state_data["Paginator"][self.callback_data]["data"]
+
+        if len(data) - page * self.limit > 0 and page >= 0:
             inline_keyboard: list[list[InlineKeyboardButton]] = []
-            for row in self.data[self.limit * page : self.limit * (page + 1)]:
+            for row in data[self.limit * page : self.limit * (page + 1)]:
                 inline_keyboard.append([InlineKeyboardButton(text=row[0], callback_data=row[1])])
             
             inline_keyboard.append([InlineKeyboardButton(text="Назад", callback_data=f"{self.callback_data}:{page-1}"),
@@ -47,8 +61,8 @@ class Paginator:
             else:
                 await message.edit_text(self.title, reply_markup=reply_markup)
 
-    def set_data(self, data: list[tuple[str, str]]):
-        self.data = data
+    async def set_data(self, state: FSMContext, current_message_id: int, data: list[tuple[str, str]]):
+        await state.update_data({"Paginator": {self.callback_data: {"data": data, "message_id": current_message_id+1}}})
 
 
 logger = logging.getLogger("user_router")
@@ -83,6 +97,6 @@ async def search_input(
         await message.answer("Ошибка поиска. Отчет об ошибке отправлен")
         await start_message(message, state)
         raise
-    search_paginator.set_data([(row["address"], f"search_results:{i}") for i, row in enumerate(result)])
-    await state.set_data({"search_input_data": {"result": result, "message_id": message.message_id}})
-    await search_paginator.show(message)
+    
+    await search_paginator.set_data(state, message.message_id, [(row["address"], f"search_results:{i}") for i, row in enumerate(result)])
+    await search_paginator.show(message, state)

@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Dict, Awaitable, Any, cast
 
 from aiogram import BaseMiddleware
@@ -7,13 +8,12 @@ from models import User
 
 class BanMiddleware(BaseMiddleware):
     def __init__(self):
-        pass
+        self.logger = logging.getLogger("BanMiddleware")
     
     async def __call__(self,
         handler: Callable[[Update, Dict[str, Any]], Awaitable[Any]],
         event: TelegramObject,
         data: Dict[str, Any]):
-        print("middleware")
         if isinstance(event, Update):
             if event.message:
                 if event.message.from_user is None:
@@ -25,4 +25,4 @@ class BanMiddleware(BaseMiddleware):
                 return
             await handler(cast(Update, event), data)
         else:
-            raise RuntimeError()
+            raise RuntimeError("Unknown event", event)

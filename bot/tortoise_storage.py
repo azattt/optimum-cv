@@ -43,6 +43,7 @@ class TortoiseStorage(BaseStorage):
             self.logger.warning("User with id %s does not exist", db_key)
             return
         user.state = new_state
+        await user.save()
 
     async def get_state(self, key: StorageKey) -> str | None:
         """
@@ -53,11 +54,9 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         self.logger.debug("Getting state for %s", db_key)
-        user = await User.get(tg_id=db_key)
         try:
             user = await User.get(tg_id=db_key)
         except DoesNotExist:
-            self.logger.warning("User with id %s does not exist", db_key)
             return None
         if not user:
             return None
@@ -81,6 +80,7 @@ class TortoiseStorage(BaseStorage):
             self.logger.warning("User with id %s does not exist", db_key)
             return
         user.data = data
+        await user.save()
 
 
     async def get_data(self, key: StorageKey) -> dict[str, Any]:
@@ -92,11 +92,7 @@ class TortoiseStorage(BaseStorage):
         """
         db_key = key.user_id
         self.logger.debug("Getting data for %s", db_key)
-        try:
-            user = await User.get(tg_id=db_key)
-        except DoesNotExist:
-            self.logger.warning("User with id %s does not exist", db_key)
-            return {}
+        user = await User.get(tg_id=db_key)
         # if not user:
         #     raise RuntimeError("no data")
         

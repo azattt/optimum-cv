@@ -31,7 +31,7 @@ async def main():
     dp = Dispatcher(storage=tortoise_storage)
     ban_middleware = BanMiddleware()
     dp.include_router(user_router)
-    dp.message.outer_middleware(ban_middleware)
+    dp.update.outer_middleware(ban_middleware)
     await dp.start_polling(bot)
     await Tortoise.close_connections()
 
