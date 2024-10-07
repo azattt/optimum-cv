@@ -206,7 +206,7 @@ class Test:
 
 def main():
     # проблема с download2.png
-    image = cv2.imread("images/map_samples/download.png")
+    image = cv2.imread("bot/test.png")
     image_height = image.shape[0]
     image_width = image.shape[1]
     areas = find_big_areas(image)

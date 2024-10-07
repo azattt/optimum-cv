@@ -117,7 +117,7 @@ async def search_input(
         await message.answer("Ошибка поиска. Отчет об ошибке отправлен")
         await start_message(message, state)
         raise
-
+ 
     
     await search_paginator.set_data(state, message.message_id, [(row["address"], f"search_results_selected:{i}", row) for i, row in enumerate(result)])
     await search_paginator.show(message, state)
