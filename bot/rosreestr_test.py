@@ -1,8 +1,18 @@
+import math
 import asyncio
 
 from pyproj import Transformer
 
 from rosreestr import search_address, extract_cadastre_objects
+
+# взято из https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+
+def deg2num(lat_deg, lon_deg, zoom):
+    lat_rad = math.radians(lat_deg)
+    n = 1 << zoom
+    xtile = int((lon_deg + 180.0) / 360.0 * n)
+    ytile = int((1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
+    return xtile, ytile
 
 async def main():
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857") 

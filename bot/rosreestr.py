@@ -24,11 +24,11 @@ async def extract_cadastre_objects(
     format: str = "PNG32",
     size: tuple[int, int] = (1024, 1024),
 ):
-    """Экспорт изображения границ кадастровых участков
+    """Экспорт изображения границ земельных участков
     Считаю, что лучше не менять другие параметры запроса.
     Args:
         bbox (tuple[float, float, float, float]): Границы изображения в формате ESPG:3857 (1021000)
-            Похоже что координаты перепутаны таким образом, что прямоугольник имеет вид: (ymin, xmin, ymax, xmax)
+            Похоже, что координаты перепутаны таким образом, что прямоугольник имеет вид: (ymin, xmin, ymax, xmax)
         dpi (int): DPI. По умолчанию 96
         format (str): Формат выходного изображения. По умолчанию PNG32. Ограниченный список можно получить по адресу
             https://pkk.rosreestr.ru/arcgis/rest/services/PKK6/CadastreObjects/MapServer/export
