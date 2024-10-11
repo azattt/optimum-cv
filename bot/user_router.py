@@ -1,11 +1,14 @@
 import logging
 from typing import Any
+
 from aiogram import Bot, Router, F
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart
 
 from states import UserStates
+
+from curl_cffi.requests import AsyncSession
 
 from rosreestr import search_address
 
@@ -135,6 +138,8 @@ async def search_results_selected(callback_query: CallbackQuery, state: FSMConte
     selected_locality = (await search_paginator.get_data(state, callback_query.message.message_id))[row]
 
     reply_markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Вернуться к поиску", callback_data="start")]])  
-    print(selected_locality[2])
+    async with AsyncSession() as session:
+        await session.get("")
+
     await callback_query.message.answer(f"Выбран населенный пункт: \"{selected_locality[0]}\"", reply_markup=reply_markup)
     await callback_query.answer()
