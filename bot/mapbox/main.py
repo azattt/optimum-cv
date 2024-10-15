@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 import mapbox_vector_tile
-import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw, ImageFont
 
 from curl_cffi import requests
 
@@ -50,33 +50,48 @@ async def load_locality(xmin, ymin, xmax, ymax, zoom=11):
 
 
 # 50201
-fig, ax = plt.subplots()
+
 # fig1, ax1 = plt.subplots()
-for filename in glob.glob("tiles/11_638_1301.pbf"):
+x = 0
+images = []
+for filename in glob.glob("tiles/11_638_*.pbf"):
     with open(filename, "rb") as file:
         data = file.read()
         a = mapbox_vector_tile.decode(data)
-
         # print(a.keys())
         # print(len(a['Кадастровые кварталы/label']['features']), len(a['Кадастровые кварталы']['features']))
         # for index, label in enumerate(a['Кадастровые кварталы/label']['features']):
         #     print(index, label)
         # print(a['Кадастровые кварталы/label']['features'][0])
-        coordinates = a['Кадастровые кварталы']['features'][0]['geometry']['coordinates']
-        for coordinates in a['Кадастровые кварталы']['features']:
-            coordinates = coordinates['geometry']['coordinates']
-            if len(coordinates) != 1:
-                # print(1)
-                # continue
-                # Это те кадастровые кварталы, которые не полностью вошли в загруженный tile
-                for coordinate in coordinates:
-                    # Проходимся по кускам этого не вошедшего квартала
-                    if len(coordinate) != 1:
-                        raise NotImplementedError()
-                    arr = np.array(coordinate[0])
-                    ax.plot(*arr.T, 'r')
-            else:
-                arr = np.array(coordinates[0])
-                # ax.plot(*arr.T, 'g')
+        print(a.keys())
+        extent: int = a['Кадастровые кварталы']['extent']
+        img = Image.new('RGB', (1024, 1024), 'white')
+        font = ImageFont.truetype("arial.ttf", 20)
+        draw = ImageDraw.Draw(img, 'RGB')
+        ratio = 1024 / extent
+        for feature in a['Кадастровые кварталы']['features']:
+            geometry = feature['geometry']
+            if geometry['type'] == 'Polygon':
+                for coordinates in geometry['coordinates']:
+                    # print(list(map(lambda x: (x[0], x[1]), coordinates)))
+                    arr = np.array(np.array(coordinates, dtype=int) * ratio, dtype=int)
+                    print(arr.flatten().tolist())
+                    draw.polygon(xy=arr.flatten().tolist(), fill=(0, 0, 0), outline="green", width=2)
+            # break
 
-plt.show()
+        if 'Кадастровые кварталы/label' in a:
+            for feature in a['Кадастровые кварталы/label']['features']:
+                geometry = feature['geometry']
+                if geometry['type'] == 'Point':
+                    coordinates = geometry['coordinates']
+                    if feature['properties']['_label_class'] == 3:
+                        draw.text(np.array(coordinates) * ratio, feature['properties']['_name'], fill=(255, 0, 0), font=font)
+     
+        img.save(f"{filename}.png", "PNG")
+        images.append(img)
+        x += 1
+
+new_image = Image.new("RGB", (4096, 1024))
+for i, image in enumerate(images):
+    new_image.paste(image, (i*1024, 0))
+new_image.save("test1.png")
